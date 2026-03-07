@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-
+import { Link } from "react-router-dom";
 const Navbar = () => {
     const [open, setOpen] = useState(false);
     const links = ["Personal", "Business", "Wealth", "About"];
@@ -35,9 +35,11 @@ const Navbar = () => {
                     <button className="text-gray-200 text-sm font-serif hover:text-yellow-500">
                         Sign In
                     </button>
-                    <button className="px-4 py-2 rounded-md bg-yellow-500 text-sm text-white font-semibold font-serif hover:scale-103 transition cursor-pointer">
-                        Open Account
-                    </button>
+                    <Link to={'/dashboard'}>
+                        <button className="px-4 py-2 rounded-md bg-yellow-500 text-sm text-white font-semibold font-serif hover:scale-103 transition cursor-pointer">
+                            Dashboard
+                        </button>
+                    </Link>
                 </div>
 
                 {/* Mobile menu button */}
