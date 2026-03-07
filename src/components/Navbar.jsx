@@ -32,9 +32,11 @@ const Navbar = () => {
 
                 {/* Desktop Buttons */}
                 <div className="hidden md:flex items-center gap-5">
-                    <button className="text-gray-200 text-sm font-serif hover:text-yellow-500">
-                        Sign In
-                    </button>
+                    <Link to={'/signup'}>
+                        <button className="text-gray-200 text-sm font-serif hover:text-yellow-500">
+                            Sign In
+                        </button>
+                    </Link>
                     <Link to={'/dashboard'}>
                         <button className="px-4 py-2 rounded-md bg-yellow-500 text-sm text-white font-semibold font-serif hover:scale-103 transition cursor-pointer">
                             Dashboard
