@@ -1,17 +1,66 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield, UserPlus } from "lucide-react";
 import bankHero from "../assets/image.png";
+import { client } from "../config/supabase";
+import Swal from "sweetalert2";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate()
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { data, error } = await client.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: fullName
+        }
+      }
+    });
+
+    if (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.message,
+        background: "#0f172a",
+        color: "#fff",
+        confirmButtonColor: "#eab308",
+        customClass: {
+          popup: "rounded-popup"
+        }
+      });
+      
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Account Created",
+        text: "Your account has been created successfully",
+        background: "#0f172a",
+        color: "#fff",
+        confirmButtonColor: "#eab308",
+        customClass: {
+          popup: "rounded-popup"
+        }
+      });
+
+      console.log(data);
+
+      await client.from("users").insert([
+        {
+          name: fullName,
+          email: email
+        }
+      ]);
+
+      navigate('/login')
+    }
   };
 
   return (
@@ -47,7 +96,7 @@ const Signup = () => {
 
           <div>
             <h1 className="text-3xl font-serif font-bold text-white">
-          Create an account
+              Create an account
             </h1>
 
             <p className="text-gray-400 font-serif mt-2">
@@ -93,7 +142,7 @@ const Signup = () => {
             <div className="space-y-2">
               <label className="text-white font-serif font-medium pb-2">
                 Password
-                </label>
+              </label>
 
               <div className="relative">
                 <input

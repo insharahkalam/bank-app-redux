@@ -65,10 +65,17 @@ const Navbar = () => {
                             {l}
                         </a>
                     ))}
+                    <Link to={'/signup'}>
+                        <button className="w-full mt-2 px-4 py-2 rounded-md bg-yellow-400 text-black font-serif font-semibold hover:bg-green-500 transition">
+                            Signup
+                        </button>
+                    </Link>
 
-                    <button className="w-full mt-2 px-4 py-2 rounded-md bg-yellow-400 text-white font-semibold hover:bg-green-500 transition">
-                        Open Account
-                    </button>
+                    <Link to={'/dashboard'}>
+                        <button className="w-full mt-2 px-4 py-2 rounded-md bg-yellow-400 text-black font-serif font-semibold hover:bg-green-500 transition">
+                            Dashboard
+                        </button>
+                    </Link>
                 </div>
             )}
         </nav>

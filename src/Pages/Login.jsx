@@ -1,19 +1,54 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield, Lock } from "lucide-react";
 import bankHero from "../assets/image.png";
 import { client } from "../config/supabase";
-
+import Swal from "sweetalert2";
 
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const { data, error } = await client.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+
+            Swal.fire({
+                icon: "error",
+                title: "Login Failed",
+                text: error.message,
+                background: "#0f172a",
+                color: "#fff",
+                confirmButtonColor: "#eab308"
+            });
+
+        } else {
+
+            Swal.fire({
+                icon: "success",
+                title: "Login Successful",
+                text: "Welcome back to BankState",
+                background: "#0f172a",
+                color: "#fff",
+                confirmButtonColor: "#eab308",
+                  customClass: {
+                    popup: "rounded-popup"
+                }
+            });
+
+            navigate("/dashboard");
+        }
     };
+
 
     return (
         <div className="flex min-h-screen bg-[#0f172a]">

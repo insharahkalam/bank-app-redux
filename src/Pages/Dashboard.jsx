@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { withdraw, deposite, reset } from "../Redux/BankSlice";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Swal from "sweetalert2";
+import { client } from "../config/supabase";
 
 const Dashboard = () => {
 
@@ -12,20 +14,161 @@ const Dashboard = () => {
     console.log(bank);
 
     const [amount, setAmount] = useState();
+    const [userId, setUserId] = useState(null);
 
-    const handledeposite = () => {
+    const getUser = async () => {
+        const { data } = await client.auth.getUser();
+        let userId = data.user.id
+        return userId;
+
+    }
+    getUser()
+
+    const handledeposite = async () => {
+        if (!amount) return;
+        const { error } = await client
+            .from("transactions")
+            .insert([{ user_id: userId, type: "Deposit", amount: Number(amount) }]);
+
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "DB Error",
+                text: error.message,
+                customClass: {
+                    popup: "rounded-popup"
+                }
+            });
+            return;
+        }
+
         dispatch(deposite(Number(amount)))
+        Swal.fire({
+            icon: "success",
+            title: "Deposited!",
+            text: `$${amount} added to your balance.`,
+            background: "#0b1f3a",
+            color: "#fff",
+            confirmButtonColor: "#facc15",
+            customClass: {
+                popup: "rounded-popup"
+            }
+        });
         setAmount("");
     };
 
-    const handlewithdraw = () => {
+    const handlewithdraw = async () => {
+        if (!amount) return;
+        if (Number(amount) > bank) {
+            Swal.fire({
+                icon: "error",
+                title: "Insufficient Balance",
+                text: "You cannot withdraw more than your current balance!",
+                background: "#0b1f3a",
+                color: "#fff",
+                confirmButtonColor: "#f87171",
+                customClass: {
+                    popup: "rounded-popup"
+                }
+            });
+            return;
+        }
+        const { error } = await client
+            .from("transactions")
+            .insert([{ user_id: userId, type: "Withdraw", amount: Number(amount) }]);
+
+        if (error) {
+            Swal.fire({ icon: "error", title: "DB Error", text: error.message });
+            return;
+        }
+
         dispatch(withdraw(Number(amount)))
+        Swal.fire({
+            icon: "success",
+            title: "Withdrawn!",
+            text: `$${amount} has been withdrawn from your balance.`,
+            background: "#0b1f3a",
+            color: "#fff",
+            confirmButtonColor: "#f87171",
+            customClass: {
+                popup: "rounded-popup"
+            }
+        });
         setAmount("");
     };
 
-    const resetall = () => {
-        dispatch(reset(bank))
+    const resetall = async () => {
+        if (!userId) return; // ensure userId loaded
+
+        // 1️⃣ Delete from Supabase
+        const { error } = await client
+            .from("transactions")
+            .delete()
+            .eq("user_id", userId);
+
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "DB Error",
+                text: error.message,
+                background: "#0b1f3a",
+                color: "#fff",
+                confirmButtonColor: "#f87171",
+                customClass: {
+                    popup: "rounded-popup"
+                }
+            });
+            return;
+        }
+
+        // 2️⃣ Reset Redux state
+        dispatch(reset());
+
+        // 3️⃣ Show success alert
+        Swal.fire({
+            icon: "info",
+            title: "Reset Successful",
+            text: "Balance and transaction history have been cleared.",
+            background: "#0b1f3a",
+            color: "#fff",
+            confirmButtonColor: "#facc15",
+            customClass: {
+                popup: "rounded-popup"
+            }
+        });
     };
+
+
+    useEffect(() => {
+        const init = async () => {
+            try {
+                const { data: { user }, error } = await client.auth.getUser();
+                if (error) throw error;
+                setUserId(user.id);
+
+                const { data, error: historyError } = await client
+                    .from("transactions")
+                    .select("*")
+                    .eq("user_id", user.id)
+                    .order("created_at", { ascending: false });
+
+                if (historyError) throw historyError;
+
+                data.forEach(item => {
+                    if (item.type === "Deposit") dispatch(deposite(item.amount));
+                    else if (item.type === "Withdraw") dispatch(withdraw(item.amount));
+                });
+
+            } catch (err) {
+                console.log("Error:", err.message);
+            }
+        };
+
+        init();
+    }, [dispatch]);
+
+
+
 
     return (
 

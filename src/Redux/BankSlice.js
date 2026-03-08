@@ -4,7 +4,8 @@ const bankSlice = createSlice({
     name: 'BankApp',
     initialState: {
         value: 0,
-        history: []
+        history: [],
+        error: null
     },
     reducers: {
         deposite: (state, action) => {
@@ -20,6 +21,9 @@ const bankSlice = createSlice({
                 type: "Withdraw",
                 amount: action.payload
             })
+        },
+        setError: (state, action) => {
+            state.error = action.payload;
         },
         reset: (state) => {
             state.value = 0

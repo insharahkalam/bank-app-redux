@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.rounded-popup {
+    border-radius: 30px !important;
+    box-shadow: 0px 0px 15px rgba(155, 155, 155, 0.6) !important;
+    font-family: serif;
+}
+
+
