@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { client } from "../config/supabase";
 import Swal from "sweetalert2";
+import { div } from "framer-motion/client";
 
 const ProtectedRoute = ({ children }) => {
 
@@ -21,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
 
     }, []);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <div className="w-full h-screen flex justify-center items-center"> <p className="loader"></p></div>;
 
     if (!user) {
 
